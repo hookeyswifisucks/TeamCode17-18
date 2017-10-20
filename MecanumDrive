@@ -1,0 +1,55 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
+
+/**
+ * Created by robotics on 9/20/2017.
+ */
+
+@TeleOp(name="MecanumDrive", group="Mecanum")
+public class MecanumDrive extends LinearOpMode
+{
+    MecanumHardware robot = new MecanumHardware();
+
+    public double leftY;
+    public double leftX;
+    public double rightX;
+
+    @Override
+    public void runOpMode()
+    {
+        robot.init(hardwareMap);
+
+        waitForStart();
+
+        while (opModeIsActive()){
+
+            if (gamepad1.left_stick_x >= 0.1 || gamepad1.left_stick_x <= -0.1){
+                leftX = gamepad1.left_stick_x;
+            } else {
+                leftX = 0;
+            }
+            if (-gamepad1.left_stick_y >= 0.1 || -gamepad1.left_stick_y <= -0.1) {
+                leftY = -gamepad1.left_stick_y;
+            } else {
+                leftY = 0;
+            }
+            if (gamepad1.right_stick_x >= 0.1 || gamepad1.right_stick_x <= -0.1) {
+                rightX = gamepad1.right_stick_x;
+            } else {
+                rightX = 0;
+            }
+
+            //good
+            robot.frontRight.setPower(leftY + leftX - rightX);
+            //good
+            robot.backRight.setPower(leftY - leftX - rightX);
+            //good
+            robot.frontLeft.setPower(leftY - leftX + rightX);
+            //good
+            robot.backLeft.setPower(leftY + leftX + rightX);
+        }
+    }
+}
