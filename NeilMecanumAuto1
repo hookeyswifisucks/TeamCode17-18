@@ -1,0 +1,50 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Hardware;
+
+/**
+ * Created by robotics on 10/11/2017.
+ */
+
+@Autonomous(name="Mecanum: AutoTime", group="Mecanum")
+public class MecanumAutoTime extends LinearOpMode
+{
+
+    MecanumHardware robot = new MecanumHardware();
+    ElapsedTime runtime = new ElapsedTime();
+
+    static final double FORWARD_SPEED = 0.6;
+
+    public void runOpMode()
+    {
+        robot.init(hardwareMap);
+
+        waitForStart();
+
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds() < 1.5)
+        {
+            robot.frontRight.setPower(FORWARD_SPEED);
+            robot.backRight.setPower(-FORWARD_SPEED);
+            robot.frontLeft.setPower(-FORWARD_SPEED);
+            robot.backLeft.setPower(FORWARD_SPEED);
+        }
+
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds() < 0.5)
+        {
+            robot.frontRight.setPower(-FORWARD_SPEED);
+            robot.backRight.setPower(-FORWARD_SPEED);
+            robot.frontLeft.setPower(-FORWARD_SPEED);
+            robot.backLeft.setPower(-FORWARD_SPEED);
+        }
+
+
+    sleep(1000);
+
+    }
+
+}
