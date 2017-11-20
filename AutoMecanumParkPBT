@@ -1,0 +1,67 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+/**
+ * Created by Phoebe Taylor on 11/10/2017.
+ * This code is for parking in the triangle zones with a mecanum drive train
+ */
+
+@Autonomous(name = "Mecanum_park", group = "Autonomous Mecanum")
+public class AutoMecanumPark extends LinearOpMode {
+
+    //make object of mecanum hardware class
+    MecanumHardware robot = new MecanumHardware();
+    //declare an object of the ElapsedTime class to allow you to calculate how long you've been driving
+    private ElapsedTime runtime = new ElapsedTime();
+
+    //Variables you will need to calculate the circumference of the wheel and how long it takes to
+    //spin the wheel once. 'final' means that it cannot be changed anywhere else in the program,
+    //which denotes that this variable is permanent (you can't change the hardware dimensions, so the
+    //program shouldn't either)
+    static final double COUNTS_PER_MOTOR_REV = 1440;
+    static final double DRIVE_GEAR_REDUCTION = 2.0;  //i have no idea what this is and first is super vague...
+    static final double WHEEL_DIAMETER_INCHES = 4.0;
+    static final double COUNTS_PER_INCH =  (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+
+    static final double DRIVE_SPEED = 0.6;
+    static final double TURN_SPEED = 0.5;
+
+    @Override
+    public void runOpMode(){
+        //start the init method in the hardware class
+        robot.init(hardwareMap);
+
+        //send some telemetry messages to tell you that it's running
+        telemetry.addData("IT'S RUNNING WTF", "autonomous");
+        telemetry.update();
+
+        //tell the encoders to reset for a hot sec
+        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        idle();
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+
+        // Step through each leg of the path,
+        // Note: Reverse movement is obtained by setting a negative distance (not speed)
+        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+
+
+
+
+
+
+    }
+
+
+}
