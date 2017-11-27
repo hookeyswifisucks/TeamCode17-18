@@ -69,9 +69,11 @@ public class AutoMecanumPark extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  S1_FORWARD_LEFT,  S1_FORWARD_LEFT, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   S2_TURN, S2_TURN, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, s3_FORWARD_LEFT, s1_FORWARD_RIGHT, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        //direction indicates to the method whether it is doing forward (0), turning right (1), turning
+        //left (2), or moving backward (3)
+        encoderDrive(DRIVE_SPEED,  S1_FORWARD_LEFT,  S1_FORWARD_LEFT, 5.0, 0);  // S1: Forward 47 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   S2_TURN, S2_TURN, 4.0, 1);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, s3_FORWARD_LEFT, s1_FORWARD_RIGHT, 4.0, 0);  // S3: Forward 24 Inches with 4 Sec timeout
 
     }
 
@@ -85,7 +87,7 @@ public class AutoMecanumPark extends LinearOpMode {
  */
     public void encoderDrive(double speed,
                              double leftInches, double rightInches,
-                             double timeoutS) {
+                             double timeoutS, int direction) {
         int newLeftTarget;
         int newRightTarget;
 
@@ -104,8 +106,41 @@ public class AutoMecanumPark extends LinearOpMode {
 
             // reset the timeout time and start motion.
             runtime.reset();
-            robot.frontLeft.setPower(Math.abs(speed));
-            robot.frontRight.setPower(Math.abs(speed));
+            double power = Math.abs(speed);
+
+            if (direction == 0)
+            {
+                //you're moving forward
+                robot.frontLeft.setPower(power);
+                robot.backLeft.setPower(power);
+                robot.frontRight.setPower(-1*power);
+                robot.backRight.setPower(-1*power);
+            }
+            else if (direction == 1)
+            {
+                //you're turning right
+                robot.frontLeft.setPower(power);
+                robot.backLeft.setPower(power);
+                robot.frontRight.setPower(power);
+                robot.backRight.setPower(power);
+            }
+            else if (direction == 2)
+            {
+                //you're turning left
+                robot.frontLeft.setPower(-1*power);
+                robot.backLeft.setPower(-1*power);
+                robot.frontRight.setPower(-1*power);
+                robot.backRight.setPower(-1*power);
+            }
+            else if (direction == 3)
+            {
+                //you're reversing
+                robot.frontLeft.setPower(-1*power);
+                robot.backLeft.setPower(-1*power);
+                robot.frontRight.setPower(power);
+                robot.backRight.setPower(power);
+            }
+
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             while (opModeIsActive() &&
