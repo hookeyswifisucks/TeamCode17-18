@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by Phoebe Taylor on 11/10/2017.
- * This code is for parking in the triangle zones with a mecanum drive train
+ * This code is for parking in the triangle zones with a mecanum drive train using encoders
  */
 
 @Autonomous(name = "Mecanum_park", group = "Autonomous Mecanum")
@@ -31,6 +31,24 @@ public class AutoMecanumPark extends LinearOpMode {
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.5;
 
+    /*the following variables are arguments for the encoderDrive method, each for a different action
+    FORWARD variables tell that wheel what it should do when it is moving forward, TURN are for when
+    the robot will be turning, etc. Because we have a 4-wheeled robot (as opposed to the pushbot)
+    the the values must work for all the wheels. To decide with wheels are assigned positive or negative
+    values, see the logic from the driver class. We will not be going diagonally in this code, so you
+    will only need to use one axis (just y axis for forward, just z for rotation, just x for laterally) */
+
+    //For forward motion with our wheel configuration, the right side needs to be negative, and the right
+    //needs to be positive (opposite of the driver class because we reverse Y in the driver but not here)
+    static final double s1_FORWARD_RIGHT = 10;
+    static final double S1_FORWARD_LEFT = -10;
+
+    //All Z axis values are positive, so you only need one variable for all the wheels
+    static final double S2_TURN = 15;
+
+    static final double s3_FORWARD_RIGHT = 10;
+    static final double s3_FORWARD_LEFT = -10;
+
     @Override
     public void runOpMode(){
         //start the init method in the hardware class
@@ -42,9 +60,8 @@ public class AutoMecanumPark extends LinearOpMode {
 
         //tell the encoders to reset for a hot sec
         robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         idle();
 
         // Wait for the game to start (driver presses PLAY)
@@ -52,15 +69,67 @@ public class AutoMecanumPark extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,  S1_FORWARD_LEFT,  S1_FORWARD_LEFT, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   S2_TURN, S2_TURN, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, s3_FORWARD_LEFT, s1_FORWARD_RIGHT, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
+    }
 
+    /*
+ *  Method to perfmorm a relative move, based on encoder counts.
+ *  Encoders are not reset as the move is based on the current position.
+ *  Move will stop if any of three conditions occur:
+ *  1) Move gets to the desired position
+ *  2) Move runs out of time
+ *  3) Driver stops the opmode running.
+ */
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS) {
+        int newLeftTarget;
+        int newRightTarget;
 
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
 
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = robot.frontLeft.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightTarget = robot.frontRight.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            robot.frontLeft.setTargetPosition(newLeftTarget);
+            robot.frontRight.setTargetPosition(newRightTarget);
 
+            // Turn On RUN_TO_POSITION
+            robot.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+            // reset the timeout time and start motion.
+            runtime.reset();
+            robot.frontLeft.setPower(Math.abs(speed));
+            robot.frontRight.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (robot.frontLeft.isBusy() && robot.frontRight.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d",
+                        robot.frontLeft.getCurrentPosition(),
+                        robot.frontRight.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            robot.frontLeft.setPower(0);
+            robot.frontRight.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            robot.frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        }
     }
 
 
