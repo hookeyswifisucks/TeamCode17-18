@@ -31,23 +31,25 @@ public class AutoMecanumPark extends LinearOpMode {
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.5;
 
-    /*the following variables are arguments for the encoderDrive method, each for a different action
-    FORWARD variables tell that wheel what it should do when it is moving forward, TURN are for when
-    the robot will be turning, etc. Because we have a 4-wheeled robot (as opposed to the pushbot)
-    the the values must work for all the wheels. To decide with wheels are assigned positive or negative
-    values, see the logic from the driver class. We will not be going diagonally in this code, so you
-    will only need to use one axis (just y axis for forward, just z for rotation, just x for laterally) */
+    /*the following variables are arguments for the encoderDrive method, each for a different action.
+    RIGHT variables denote values that are applicable for the right wheels, LEFT for left wheels.
+    Rotating on the Z axis means all wheels are spinning in the same direction, so only one TURN variable is necessary.
+    We will not be going diagonally in this code, so you will only need to use one axis
+    (just y axis for forward, just z for rotation, just x for laterally) */
 
-    //For forward motion with our wheel configuration, the right side needs to be negative, and the right
-    //needs to be positive (opposite of the driver class because we reverse Y in the driver but not here)
-    static final double s1_FORWARD_RIGHT = 10;
-    static final double S1_FORWARD_LEFT = -10;
+    /**For forward/backward motion with our wheel configuration, the right side needs to be negative, and the right
+    needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here) */
+    //s1 will be moving forward
+    static final double s1_RIGHT = 10;
+    static final double S1_LEFT = -10;
 
     //All Z axis values are positive, so you only need one variable for all the wheels
+    //s2 is to turn to the right
     static final double S2_TURN = 15;
 
-    static final double s3_FORWARD_RIGHT = 10;
-    static final double s3_FORWARD_LEFT = -10;
+    //s3 will be moving backward
+    static final double s3_RIGHT = -10;
+    static final double s3_LEFT = 10;
 
     @Override
     public void runOpMode(){
@@ -69,11 +71,10 @@ public class AutoMecanumPark extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        //direction indicates to the method whether it is doing forward (0), turning right (1), turning
-        //left (2), or moving backward (3)
-        encoderDrive(DRIVE_SPEED,  S1_FORWARD_LEFT,  S1_FORWARD_LEFT, 5.0, 0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   S2_TURN, S2_TURN, 4.0, 1);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, s3_FORWARD_LEFT, s1_FORWARD_RIGHT, 4.0, 0);  // S3: Forward 24 Inches with 4 Sec timeout
+        //the LEFT and RIGHT in the variables denotes the wheel or side to which it is assigned, not the direction it aims to move the robot
+        encoderDrive(DRIVE_SPEED,  S1_LEFT, s1_RIGHT, 5.0);  // S1: Forward 10 inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   S2_TURN, S2_TURN, 4.0);  // S2: Turn Right 15 inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, s3_LEFT, s3_RIGHT, 4.0);  // S3: Backward 10 inches with 4 Sec timeout
 
     }
 
@@ -87,59 +88,44 @@ public class AutoMecanumPark extends LinearOpMode {
  */
     public void encoderDrive(double speed,
                              double leftInches, double rightInches,
-                             double timeoutS, int direction) {
-        int newLeftTarget;
-        int newRightTarget;
+                             double timeoutS) {
+        int newFrontLeftTarget;
+        int newFrontRightTarget;
+        int newBackLeftTarget;
+        int newBackRightTarget;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newLeftTarget = robot.frontLeft.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRightTarget = robot.frontRight.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            robot.frontLeft.setTargetPosition(newLeftTarget);
-            robot.frontRight.setTargetPosition(newRightTarget);
+            newFrontLeftTarget = robot.frontLeft.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newFrontRightTarget = robot.frontRight.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newBackLeftTarget = robot.backLeft.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newBackRightTarget = robot.backRight.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+            robot.frontLeft.setTargetPosition(newFrontLeftTarget);
+            robot.frontRight.setTargetPosition(newFrontRightTarget);
+            robot.backLeft.setTargetPosition(newBackLeftTarget);
+            robot.backRight.setTargetPosition(newBackRightTarget);
+
+
 
             // Turn On RUN_TO_POSITION
             robot.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
 
             // reset the timeout time and start motion.
             runtime.reset();
             double power = Math.abs(speed);
 
-            if (direction == 0)
-            {
-                //you're moving forward
-                robot.frontLeft.setPower(power);
-                robot.backLeft.setPower(power);
-                robot.frontRight.setPower(-1*power);
-                robot.backRight.setPower(-1*power);
-            }
-            else if (direction == 1)
-            {
-                //you're turning right
-                robot.frontLeft.setPower(power);
-                robot.backLeft.setPower(power);
-                robot.frontRight.setPower(power);
-                robot.backRight.setPower(power);
-            }
-            else if (direction == 2)
-            {
-                //you're turning left
-                robot.frontLeft.setPower(-1*power);
-                robot.backLeft.setPower(-1*power);
-                robot.frontRight.setPower(-1*power);
-                robot.backRight.setPower(-1*power);
-            }
-            else if (direction == 3)
-            {
-                //you're reversing
-                robot.frontLeft.setPower(-1*power);
-                robot.backLeft.setPower(-1*power);
-                robot.frontRight.setPower(power);
-                robot.backRight.setPower(power);
-            }
+            robot.frontLeft.setPower(power);
+            robot.backLeft.setPower(power);
+            robot.frontRight.setPower(power);
+            robot.backRight.setPower(power);
 
 
             // keep looping while we are still active, and there is time left, and both motors are running.
@@ -148,7 +134,7 @@ public class AutoMecanumPark extends LinearOpMode {
                     (robot.frontLeft.isBusy() && robot.frontRight.isBusy())) {
 
                 // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
+                telemetry.addData("Path1",  "Running to %7d :%7d", newFrontLeftTarget,  newFrontRightTarget);
                 telemetry.addData("Path2",  "Running at %7d :%7d",
                         robot.frontLeft.getCurrentPosition(),
                         robot.frontRight.getCurrentPosition());
@@ -158,10 +144,16 @@ public class AutoMecanumPark extends LinearOpMode {
             // Stop all motion;
             robot.frontLeft.setPower(0);
             robot.frontRight.setPower(0);
+            robot.backRight.setPower(0);
+            robot.backLeft.setPower(0);
 
             // Turn off RUN_TO_POSITION
             robot.frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
 
             //  sleep(250);   // optional pause after each move
         }
