@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 /**
  * Created by Phoebe Taylor on 11/10/2017.
@@ -22,7 +23,7 @@ public class AutoMecanumPark extends LinearOpMode {
     //spin the wheel once. 'final' means that it cannot be changed anywhere else in the program,
     //which denotes that this variable is permanent (you can't change the hardware dimensions, so the
     //program shouldn't either)
-    static final double COUNTS_PER_MOTOR_REV = 1220;
+    static final double COUNTS_PER_MOTOR_REV = 1680;
     static final double WHEEL_DIAMETER_INCHES = 4.0;
     static final double COUNTS_PER_INCH =  (COUNTS_PER_MOTOR_REV) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
@@ -38,19 +39,20 @@ public class AutoMecanumPark extends LinearOpMode {
 
     /**For forward/backward motion with our wheel configuration, the right side needs to be negative, and the right
     needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here)
-     50 POINTS FORWARD IS EQUAL TO ROUGHLY 2 FEET (24 INCHES)*/
+     50 POINTS FORWARD IS EQUAL TO ROUGHLY 2 FEET (24 INCHES). a 40 pt turn will go just past 90 degrees. */
     //s1 will be moving forward
-    static final double s1_RIGHT = -50;
-    static final double S1_LEFT = 50;
+    static final double s1_RIGHT = -23;
+    static final double S1_LEFT = 23;
 
+    /*
     //All Z axis values are positive, so you only need one variable for all the wheels
     //s2 is to turn to the right
-    static final double S2_TURN = 40;
+    static final double S2_TURN = 4;
 
     //s3 will be moving backward
-    static final double s3_RIGHT = 50;
-    static final double s3_LEFT = -50;
-
+    static final double s3_RIGHT = 10;
+    static final double s3_LEFT = -10;
+*/
     @Override
     public void runOpMode(){
         //start the init method in the hardware class
@@ -80,8 +82,8 @@ public class AutoMecanumPark extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //the LEFT and RIGHT in the variables denotes the wheel or side to which it is assigned, not the direction it aims to move the robot
         encoderDrive(DRIVE_SPEED, S1_LEFT, s1_RIGHT, 10.0, "forward");  // S1: Forward 10 inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED, S2_TURN, S2_TURN, 10.0, "turn");  // S2: Turn Right 15 inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, s3_LEFT, s3_RIGHT, 10.0, "backward");  // S3: Backward 10 inches with 4 Sec timeout
+//        encoderDrive(TURN_SPEED, S2_TURN, S2_TURN, 10.0, "turn");  // S2: Turn Right 15 inches with 4 Sec timeout
+//        encoderDrive(DRIVE_SPEED, s3_LEFT, s3_RIGHT, 10.0, "backward");  // S3: Backward 10 inches with 4 Sec timeout
 
     }
 
