@@ -1,0 +1,133 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+/**
+ * Created by Phoebe Taylor on 10/23/2017.
+ * Program is for running a mecanum drive train with a lift, which consists of a motor and 2 180
+ * servos for grabbing the blocks. The horizontal lift for the relic will consist of another motor
+ * and two more 180 servos.
+ * right bumper will open and close the grabbers on the vertical lift
+ * 'Y' will raise the vertical lift, and 'X' will lower it
+ * 'B' will extend the horizontal lift and 'A' will retract it
+ * left bumper will rotate the elbow of the horizontal lift from parallel to perpendicular to the ground
+ * The down button on the plus-pad will alternate between the relic grabber opening and closing
+ */
+
+@TeleOp(name="with_horizontal_lift", group = "mecanum")
+public class HorizontalMecanumDriveClass extends LinearOpMode{
+
+    /*Declare controller variables */
+    public double x_axis;
+    public double y_axis;
+    public double z_axis;
+    int elbow_switch = 1;
+    int grab_switch = 0;
+    int dpad_switch = 0;
+
+    //make object of the hardware class so we can use its elements
+    MecanumHardware robot = new MecanumHardware();
+
+    @Override
+    public void runOpMode () {
+        robot.init(hardwareMap);
+
+        waitForStart();
+        while (opModeIsActive()) {
+            /* following code is for the drive train */
+            //buffer for y axis of steering
+            if (gamepad1.left_stick_y < -0.1 || gamepad1.left_stick_y > 0.1) {
+                y_axis = -gamepad1.left_stick_y;
+            } else {
+                y_axis = 0;
+            }
+            //buffer for x axis of steering
+            if (gamepad1.left_stick_x < -0.1 || gamepad1.left_stick_x > 0.1) {
+                x_axis = gamepad1.left_stick_x;
+            } else {
+                x_axis = 0;
+            }
+            //buffer for z axis (turning)
+            if (gamepad1.right_stick_x < -0.1 || gamepad1.right_stick_x > 0.1) {
+                z_axis = gamepad1.right_stick_x;
+            } else {
+                z_axis = 0;
+            }
+
+            //logic for setting power to correct motors
+            robot.frontRight.setPower(x_axis - y_axis + z_axis);
+            robot.frontLeft.setPower(x_axis + y_axis + z_axis);
+            robot.backRight.setPower(-x_axis - y_axis + z_axis);
+            robot.backLeft.setPower(-x_axis + y_axis + z_axis);
+
+            /**end code for drive train, below is the code for the vertical lift */
+            //code for grabber, the right bumper will allow controller to alternate between grabbed
+            //and open
+            if (gamepad1.right_bumper) {
+                if (grab_switch == 0) {
+                    robot.left_grab.setPosition(0.52);
+                    robot.right_grab.setPosition(0.48);
+                    grab_switch = 1;
+                }
+                else if (grab_switch == 1) {
+                    robot.left_grab.setPosition(0.1);
+                    robot.right_grab.setPosition(0.8);
+                    grab_switch = 0;
+                }
+            }
+
+            //code for the lift motor. Y button will go up, X will go down, and if the limit switch
+            //and the X button are pressed simultaneously, the motor will not move
+            if (gamepad1.y) {
+                robot.lift.setPower(0.3);
+            }
+            else if (gamepad1.x) {
+                robot.lift.setPower(-0.3);
+            }
+            else {
+                robot.lift.setPower(0);
+            }
+
+            /**end code for vertical lift, below is code for the horizontal lift */
+            //while the 'b' button is pressed, arm will extend, while 'a' is pressed it will come back in
+            if (gamepad1.b) {
+                robot.horizontal_lift.setPower(0.3);
+            }
+            else if (gamepad1.a) {
+                robot.horizontal_lift.setPower(-0.3);
+            }
+            else {
+                robot.horizontal_lift.setPower(0);
+            }
+            //the switch will allow driver to change from having the elbow perpendicular to the ground
+            //to parallel to the ground
+            if (gamepad1.left_bumper) {
+                if (elbow_switch == 0){
+                    robot.elbow_joint.setPosition(0.67);
+                    elbow_switch = 1;
+                }
+                else if (elbow_switch == 1){
+                    robot.elbow_joint.setPosition(0.17);
+                    elbow_switch = 0;
+                }
+            }
+
+            //the down button on the plus pad will open and close the horizontal grabber
+            if (gamepad1.dpad_down) {
+                if (dpad_switch == 0) {
+                    robot.claw.setPosition(0.5);
+                }
+                if (dpad_switch == 1) {
+                    robot.claw.setPosition(0.17);
+                }
+            }
+
+
+
+            telemetry.update();
+        }
+
+    }
+
+}
