@@ -1,0 +1,137 @@
+ackage org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
+
+/**
+ * Created by robotics on 9/20/2017.
+ */
+
+@TeleOp(name="MecanumDrive", group="Mecanum")
+public class MecanumDrive extends LinearOpMode
+{
+
+    final int BLUE_LED_CHANNEL = 0;
+    final int RED_LED_CHANNEL = 1;
+
+    MecanumHardware robot = new MecanumHardware();
+    ElapsedTime runtime = new ElapsedTime();
+
+    public double leftY;
+    public double leftX;
+    public double rightX;
+
+    final int NOT_PRESSED = 0;
+    final int PRESSED = 0;
+
+    @Override
+    public void runOpMode()
+    {
+        robot.init(hardwareMap);
+
+        boolean inputPin;
+        boolean outputPin;
+        DeviceInterfaceModule dim;
+        DigitalChannel digIn;
+        DigitalChannel digOut;
+
+        dim = hardwareMap.get(DeviceInterfaceModule.class, "dim");
+        digIn = hardwareMap.get(DigitalChannel.class, "digIn");
+        digOut = hardwareMap.get(DigitalChannel.class, "digOut");
+
+        digIn.setMode(DigitalChannelController.Mode.INPUT);
+        digOut.setMode(DigitalChannelController.Mode.OUTPUT);
+
+        waitForStart();
+
+        while (opModeIsActive()){
+
+            outputPin = gamepad1.right_bumper;
+            digOut.setState(outputPin);
+            inputPin = digIn.getState();
+
+            if (gamepad1.left_stick_x >= 0.1 || gamepad1.left_stick_x <= -0.1){
+                leftX = gamepad1.left_stick_x;
+                telemetry.addData("Debug", "Gamepad1.left.x is active.");
+                telemetry.update();
+            } else {
+                leftX = 0;
+            }
+            if (-gamepad1.left_stick_y >= 0.1 || -gamepad1.left_stick_y <= -0.1) {
+                leftY = -gamepad1.left_stick_y;
+                telemetry.addData("Debug", "Gamepad1.left.y is active.");
+                telemetry.update();
+            } else {
+                leftY = 0;
+            }
+            if (gamepad1.right_stick_x >= 0.1 || gamepad1.right_stick_x <= -0.1) {
+                rightX = gamepad1.right_stick_x;
+                telemetry.addData("Debug", "Gamepad1.right.x is active.");
+                telemetry.update();
+            } else {
+                rightX = 0;
+            }
+
+            //good
+            robot.frontRight.setPower(leftY - leftX - rightX);
+            //good
+            robot.backRight.setPower(leftY + leftX - rightX);
+            //good
+            robot.frontLeft.setPower(leftY + leftX + rightX);
+            //good
+            robot.backLeft.setPower(leftY - leftX + rightX);
+
+            //loop for the lift
+            if (gamepad1.right_trigger >= 0.95) {
+                robot.lift.setPower(0.2);
+                telemetry.addData("Debug", "Right Bumper is active.");
+                telemetry.update();
+            } else if (gamepad1.right_bumper) {
+                if (inputPin)
+                {
+                    dim.setLED(RED_LED_CHANNEL, true);
+                    dim.setLED(BLUE_LED_CHANNEL, false);
+                    robot.lift.setPower(-0.2);
+                }
+                else
+                {
+                    dim.setLED(RED_LED_CHANNEL, false);
+                    dim.setLED(BLUE_LED_CHANNEL, true);
+                    runtime.reset();
+                    while (runtime.seconds() < 0.1)
+                    {
+                        robot.lift.setPower(0.2);
+                    }
+                }
+            } else if (!gamepad1.right_bumper && gamepad1.right_trigger < 0.95) {
+                robot.lift.setPower(0);
+            }
+
+            if (gamepad1.y)
+            {
+                robot.reachOut.setPower(0.2);
+            }
+
+            //loop for the grabber mechanism
+            if (gamepad1.left_bumper)
+            {
+                robot.grabber.setPower(0.2);
+                telemetry.addData("Debug", "Left Bumber is active.");
+                telemetry.update();
+            }
+            else if (gamepad1.left_trigger >= 0.95)
+            {
+                robot.grabber.setPower(-0.2);
+                telemetry.addData("Debug", "Right Trigger is active :).");
+                telemetry.update();
+            }
+            else if (!gamepad1.left_bumper && gamepad1.left_trigger < 0.95){
+                robot.grabber.setPower(0);
+            }
+        }
+    }
+}
