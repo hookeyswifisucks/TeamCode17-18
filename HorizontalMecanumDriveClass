@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * Created by Phoebe Taylor on 10/23/2017.
@@ -12,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * 'Y' will raise the vertical lift, and 'X' will lower it
  * 'B' will extend the horizontal lift and 'A' will retract it
  * left bumper will rotate the elbow of the horizontal lift from parallel to perpendicular to the ground
- * The down button on the plus-pad will alternate between the relic grabber opening and closing
+ * The down button on the dpad will alternate between the relic grabber opening and closing
  */
 
 @TeleOp(name="with_horizontal_lift", group = "mecanum")
@@ -22,9 +23,7 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
     public double x_axis;
     public double y_axis;
     public double z_axis;
-    int elbow_switch = 1;
-    int grab_switch = 0;
-    int dpad_switch = 0;
+    public double elbow_value = 0.5;
 
     //make object of the hardware class so we can use its elements
     MecanumHardware robot = new MecanumHardware();
@@ -62,19 +61,13 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             robot.backLeft.setPower(-x_axis + y_axis + z_axis);
 
             /**end code for drive train, below is the code for the vertical lift */
-            //code for grabber, the right bumper will allow controller to alternate between grabbed
-            //and open
-            if (gamepad1.right_bumper) {
-                if (grab_switch == 0) {
-                    robot.left_grab.setPosition(0.52);
-                    robot.right_grab.setPosition(0.48);
-                    grab_switch = 1;
-                }
-                else if (grab_switch == 1) {
-                    robot.left_grab.setPosition(0.1);
-                    robot.right_grab.setPosition(0.8);
-                    grab_switch = 0;
-                }
+            //code for grabber, right bumper for open, right bumper for open/drop
+            if (gamepad1.left_bumper) {
+                robot.left_grab.setPosition(0.52);
+                robot.right_grab.setPosition(0.48);
+            } else if (gamepad1.right_bumper) {
+                robot.left_grab.setPosition(0.1);
+                robot.right_grab.setPosition(0.8);
             }
 
             //code for the lift motor. Y button will go up, X will go down, and if the limit switch
@@ -102,29 +95,22 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             }
             //the switch will allow driver to change from having the elbow perpendicular to the ground
             //to parallel to the ground
-            if (gamepad1.left_bumper) {
-                if (elbow_switch == 0){
-                    robot.elbow_joint.setPosition(0.67);
-                    elbow_switch = 1;
-                }
-                else if (elbow_switch == 1){
-                    robot.elbow_joint.setPosition(0.17);
-                    elbow_switch = 0;
-                }
+            while (gamepad1.left_trigger > 0.1 && gamepad1.right_trigger < 0.1) {
+                robot.claw.setPosition(0.13);
+            }
+            while (gamepad1.right_trigger > 0.1 && gamepad1.left_trigger < 0.1) {
+                robot.claw.setPosition(0.57);
             }
 
-            //the down button on the plus pad will open and close the horizontal grabber
-            if (gamepad1.dpad_down) {
-                if (dpad_switch == 0) {
-                    robot.claw.setPosition(0.5);
-                }
-                if (dpad_switch == 1) {
-                    robot.claw.setPosition(0.17);
-                }
+            //the down button on the dpad will open the horizontal grabber, the up will close it
+            while (gamepad1.dpad_down && elbow_value < 0.9) {
+                robot.elbow_joint.setPosition(elbow_value);
+                elbow_value += 0.001;
             }
-
-
-
+            while (gamepad1.dpad_up && elbow_value > 0.1) {
+                robot.elbow_joint.setPosition(elbow_value);
+                elbow_value -= 0.001;
+            }
             telemetry.update();
         }
 
