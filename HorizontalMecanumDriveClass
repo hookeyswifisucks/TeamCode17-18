@@ -62,20 +62,20 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
 
             /**end code for drive train, below is the code for the vertical lift */
             //code for grabber, right bumper for open, right bumper for open/drop
-            if (gamepad1.left_bumper) {
+            if (gamepad1.dpad_left) {
                 robot.left_grab.setPosition(0.52);
                 robot.right_grab.setPosition(0.48);
-            } else if (gamepad1.right_bumper) {
+            } else if (gamepad1.dpad_right) {
                 robot.left_grab.setPosition(0.1);
                 robot.right_grab.setPosition(0.8);
             }
 
             //code for the lift motor. Y button will go up, X will go down, and if the limit switch
             //and the X button are pressed simultaneously, the motor will not move
-            if (gamepad1.y) {
+            if (gamepad1.x) {
                 robot.lift.setPower(0.3);
             }
-            else if (gamepad1.x) {
+            else if (gamepad1.y) {
                 robot.lift.setPower(-0.3);
             }
             else {
@@ -85,7 +85,7 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             /**end code for vertical lift, below is code for the horizontal lift */
             //while the 'b' button is pressed, arm will extend, while 'a' is pressed it will come back in
             if (gamepad1.b) {
-                robot.horizontal_lift.setPower(0.3);
+                robot.horizontal_lift.setPower(0.2);
             }
             else if (gamepad1.a) {
                 robot.horizontal_lift.setPower(-0.3);
@@ -103,11 +103,11 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             }
 
             //the down button on the dpad will open the horizontal grabber, the up will close it
-            while (gamepad1.dpad_down && elbow_value < 0.9) {
+            while (gamepad1.dpad_down && elbow_value < 0.99) {
                 robot.elbow_joint.setPosition(elbow_value);
                 elbow_value += 0.001;
             }
-            while (gamepad1.dpad_up && elbow_value > 0.1) {
+            while (gamepad1.dpad_up && elbow_value > 0.01) {
                 robot.elbow_joint.setPosition(elbow_value);
                 elbow_value -= 0.001;
             }
