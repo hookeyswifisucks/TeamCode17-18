@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -22,11 +23,15 @@ public class MecanumHardware {
     public DcMotor lift = null;
     public Servo left_grab = null;
     public Servo right_grab = null;
-    public TouchSensor bottom_sensor;
+    public DigitalChannel bottom_sensor;
     //variables for the horizontal lift
     public DcMotor horizontal_lift = null;
     public Servo elbow_joint = null;
     public Servo claw = null;
+    //variable for touch sensor
+//    bottom_sensor.setMode(DigitalChannel.Mode.INPUT);
+
+
 
 
     // local OpMode members
@@ -50,8 +55,8 @@ public class MecanumHardware {
         horizontal_lift = hwMap.dcMotor.get("horizontal");
         elbow_joint = hwMap.servo.get("elbow");
         claw = hwMap.servo.get("claw");
-
-
+        //map the touch sensor
+        bottom_sensor = hwMap.digitalChannel.get("limit_switch");
 
         // set motor default power to 0 for the motors and default position to .5 for the servo
         frontRight.setPower(0);
@@ -59,11 +64,11 @@ public class MecanumHardware {
         frontLeft.setPower(0);
         backLeft.setPower(0);
         lift.setPower(0);
-        left_grab.setPosition(.1);
-        right_grab.setPosition(.9);
-        horizontal_lift.setPower(0);
-        elbow_joint.setPosition(.9);
-        claw.setPosition(.2);
+        left_grab.setPosition(0.1);
+        right_grab.setPosition(0.9);
+        horizontal_lift.setPower(0.0);
+        elbow_joint.setPosition(0.5);
+        claw.setPosition(0.57);
 
 
         // just to make sure all the motors are running forward
