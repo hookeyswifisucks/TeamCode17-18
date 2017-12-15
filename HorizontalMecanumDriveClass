@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
+
 
 /**
  * Created by Phoebe Taylor on 10/23/2017.
@@ -30,12 +34,20 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
     public double left_grab_value = 0.1;
     public double right_grab_value = 0.9;
 
+    public boolean buttonPressed = true;
+
+
+
     //make object of the hardware class so we can use its elements
     MecanumHardware robot = new MecanumHardware();
+
+
 
     @Override
     public void runOpMode () {
         robot.init(hardwareMap);
+
+        robot.bottom_sensor.setMode(DigitalChannel.Mode.INPUT);
 
         waitForStart();
         while (opModeIsActive()) {
@@ -86,8 +98,10 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
 
             //code for the lift motor. Y button will go up, X will go down, and if the limit switch
             //and the X button are pressed simultaneously, the motor will not move
-            if (gamepad1.y) {
+            if (gamepad1.y && robot.bottom_sensor.getState() == false) {
                 robot.lift.setPower(0.25);
+                buttonPressed = robot.bottom_sensor.getState();
+                telemetry.addData("touch sensor is:", buttonPressed);
             }
             else if (gamepad1.x) {
                 robot.lift.setPower(-0.3);
