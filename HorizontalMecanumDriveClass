@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * Created by Phoebe Taylor on 10/23/2017.
@@ -16,14 +15,20 @@ import com.qualcomm.robotcore.hardware.Servo;
  * The down button on the dpad will alternate between the relic grabber opening and closing
  */
 
-@TeleOp(name="with_horizontal_lift", group = "mecanum")
+@TeleOp(name="With horizontal lift", group = "mecanum")
 public class HorizontalMecanumDriveClass extends LinearOpMode{
 
     /*Declare controller variables */
     public double x_axis;
     public double y_axis;
     public double z_axis;
+    /*The following variables are used to gradually increment up or down the values of the servos so
+    that you no longer have to set a specific position for open/closed. Just hold down the button and
+    it will close or open gradually
+     */
     public double elbow_value = 0.5;
+    public double left_grab_value = 0.1;
+    public double right_grab_value = 0.9;
 
     //make object of the hardware class so we can use its elements
     MecanumHardware robot = new MecanumHardware();
@@ -61,21 +66,30 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             robot.backLeft.setPower(-x_axis + y_axis + z_axis);
 
             /**end code for drive train, below is the code for the vertical lift */
-            //code for grabber, right bumper for open, right bumper for open/drop
-            if (gamepad1.dpad_left) {
-                robot.left_grab.setPosition(0.52);
-                robot.right_grab.setPosition(0.48);
-            } else if (gamepad1.dpad_right) {
-                robot.left_grab.setPosition(0.1);
-                robot.right_grab.setPosition(0.8);
+            /*code for grabber, right bumper for open, right bumper for open/drop
+            * the first while loop will increment the grabber closed (left dpad). The second while
+            * loop will increment the grabber open (right dpad) */
+            //close
+            while (gamepad1.dpad_left && left_grab_value < 0.52 && right_grab_value > 0.48) {
+                robot.left_grab.setPosition(left_grab_value);
+                robot.right_grab.setPosition(right_grab_value);
+                left_grab_value += 0.004;
+                right_grab_value -= 0.004;
+            }
+            //open
+              while (gamepad1.dpad_right && left_grab_value > 0.1 && right_grab_value < 0.9) {
+                robot.left_grab.setPosition(left_grab_value);
+                robot.right_grab.setPosition(right_grab_value);
+                left_grab_value -= 0.004;
+                right_grab_value += 0.004;
             }
 
             //code for the lift motor. Y button will go up, X will go down, and if the limit switch
             //and the X button are pressed simultaneously, the motor will not move
-            if (gamepad1.x) {
-                robot.lift.setPower(0.3);
+            if (gamepad1.y) {
+                robot.lift.setPower(0.25);
             }
-            else if (gamepad1.y) {
+            else if (gamepad1.x) {
                 robot.lift.setPower(-0.3);
             }
             else {
@@ -85,10 +99,10 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             /**end code for vertical lift, below is code for the horizontal lift */
             //while the 'b' button is pressed, arm will extend, while 'a' is pressed it will come back in
             if (gamepad1.b) {
-                robot.horizontal_lift.setPower(0.2);
+                robot.horizontal_lift.setPower(-0.3);
             }
             else if (gamepad1.a) {
-                robot.horizontal_lift.setPower(-0.3);
+                robot.horizontal_lift.setPower(0.3);
             }
             else {
                 robot.horizontal_lift.setPower(0);
