@@ -10,10 +10,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * This code is for parking in the triangle zones with a mecanum drive train using encoders. Hopefully,
  * it will also put one glyph in the cryptobox
  * TODO: The Right grabber gets caught on the wheel after it opens bc the lift plate is wobbly
- * TODO: Turns a little too much to the right, so when testing next, lower the turn value 
  */
 
-@Autonomous(name = "AutoStraightPark", group = "Autonomous Mecanum")
+@Autonomous(name = "AutoBlueStraightPark", group = "Autonomous Mecanum")
 public class AutoStraightLift extends LinearOpMode {
 
     //make object of mecanum hardware class
@@ -31,7 +30,7 @@ public class AutoStraightLift extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
     static final double DRIVE_SPEED = 0.6;
-    static final double TURN_SPEED = 0.5;
+    static final double TURN_SPEED = 0.4;
 
 
     /*the following variables are arguments for the encoderDrive method, each for a different action.
@@ -50,7 +49,7 @@ public class AutoStraightLift extends LinearOpMode {
 
     //All Z axis values are positive, so you only need one variable for all the wheels
     //s2 is to turn to the right
-    static final double S2_TURN = 10;
+    static final double S2_TURN = 2;
 
     //These values will go to the grabbers
     static final double DROP_RIGHT = 1;
