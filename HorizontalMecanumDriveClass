@@ -89,7 +89,7 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
                 right_grab_value -= 0.004;
             }
             //open
-              while (gamepad1.dpad_right && left_grab_value > 0.1 && right_grab_value < 0.9) {
+            while (gamepad1.dpad_right && left_grab_value > 0.1 && right_grab_value < 0.9) {
                 robot.left_grab.setPosition(left_grab_value);
                 robot.right_grab.setPosition(right_grab_value);
                 left_grab_value -= 0.004;
@@ -98,13 +98,20 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
 
             //code for the lift motor. Y button will go up, X will go down, and if the limit switch
             //and the X button are pressed simultaneously, the motor will not move
-            if (gamepad1.y && robot.bottom_sensor.getState() == false) {
+            if (gamepad1.y) {
                 robot.lift.setPower(0.25);
-                buttonPressed = robot.bottom_sensor.getState();
-                telemetry.addData("touch sensor is:", buttonPressed);
+
             }
             else if (gamepad1.x) {
-                robot.lift.setPower(-0.3);
+                if (robot.bottom_sensor.getState() == false) {
+                    robot.lift.setPower(0);
+                }
+                else if (robot.bottom_sensor.getState() == true) {
+                    robot.lift.setPower(-0.3);
+                }
+                buttonPressed = robot.bottom_sensor.getState();
+                telemetry.addData("touch sensor is:", buttonPressed);
+                telemetry.update();
             }
             else {
                 robot.lift.setPower(0);
