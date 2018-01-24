@@ -1,0 +1,69 @@
+package org.firstinspires.ftc.teamcode;
+
+/**
+ * Created by Robotics on 1/3/2018.
+ */
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+
+public class SeansFirstHardware {
+
+    public DcMotor frontRight = null;
+    public DcMotor backRight = null;
+    public DcMotor frontLeft = null;
+    public DcMotor backLeft = null;
+    public DcMotor linearSlideOne = null;
+    public DcMotor linearSlideTwo = null;
+    public Servo clawServo1 = null;
+    public Servo clawServo2 = null;
+    public Servo elbowServo = null;
+    public Servo vertClaw = null;
+
+    HardwareMap hwMap = null;
+
+    public void
+
+    init (HardwareMap ahwMap)
+    {
+        hwMap = ahwMap;
+
+        frontRight = hwMap.dcMotor.get("front_right");
+        backRight = hwMap.dcMotor.get("back_right");
+        frontLeft = hwMap.dcMotor.get("front_left");
+        backLeft = hwMap.dcMotor.get("back_left");
+        linearSlideOne = hwMap.dcMotor.get("liner_slide_one");
+        linearSlideTwo = hwMap.dcMotor.get("linear_slide_two");
+        clawServo1 = hwMap.servo.get("claw_servo_1");
+        clawServo2 = hwMap.servo.get("claw_servo_2");
+        elbowServo = hwMap.servo.get("elbow_servo");
+        vertClaw = hwMap.servo.get("vert_claw");
+
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        linearSlideOne.setPower(0);
+        linearSlideTwo.setPower(0);
+        clawServo1 = null;
+        clawServo2 = null;
+        elbowServo = null;
+        vertClaw = null;
+
+        frontRight.setDirection(DcMotor.Direction.FORWARD);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
+        frontLeft.setDirection(DcMotor.Direction.FORWARD);
+        backLeft.setDirection(DcMotor.Direction.FORWARD);
+        linearSlideOne.setDirection(DcMotor.Direction.FORWARD);
+        linearSlideTwo.setDirection(DcMotor.Direction.FORWARD);
+
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        linearSlideOne.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        linearSlideTwo.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+}
