@@ -1,0 +1,103 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
+
+/**
+ * Created by Phoebe on 10/20/2017.
+ * Code for a mecanum drive train plus a rack and pinion lift (motor and 180 servo)
+ * THIS VERSION IS USED FOR ColorSensorAutoBlueTurn
+ */
+
+// change this back to MecanumHardware l8r on
+public class PhoebeHardware {
+
+    /*public OpMode Members */
+    //variables for drive train
+    public DcMotor frontRight = null;
+    public DcMotor backRight = null;
+    public DcMotor frontLeft = null;
+    public DcMotor backLeft = null;
+    //variables for vertical lift
+    public DcMotor lift = null;
+    public Servo left_grab = null;
+    public Servo right_grab = null;
+    public DigitalChannel bottom_sensor;
+    //variables for the horizontal lift
+    public DcMotor horizontal_lift = null;
+    public Servo elbow_joint = null;
+    public Servo claw = null;
+    //variable for touch sensor
+//    bottom_sensor.setMode(DigitalChannel.Mode.INPUT);
+
+    //color sensor!
+    public NormalizedColorSensor colorSensor = null;
+    public Servo colorSensorArm = null;
+
+    // local OpMode members
+    HardwareMap hwMap = null;
+
+    // run loop
+    public void init (HardwareMap ahwMap){
+        hwMap = ahwMap;
+
+        /*map motors for the configuration file */
+        //drive train map
+        frontRight = hwMap.dcMotor.get("front_right");
+        backRight = hwMap.dcMotor.get("back_right");
+        frontLeft = hwMap.dcMotor.get("front_left");
+        backLeft = hwMap.dcMotor.get("back_left");
+        //horizontal lift map
+        lift = hwMap.dcMotor.get("lift");
+        left_grab = hwMap.servo.get("left_grab");
+        right_grab = hwMap.servo.get("right_grab");
+        //vertical lift map
+        horizontal_lift = hwMap.dcMotor.get("horizontal");
+        elbow_joint = hwMap.servo.get("elbow");
+        claw = hwMap.servo.get("claw");
+        //map the touch sensor
+        bottom_sensor = hwMap.digitalChannel.get("limit_switch");
+        //map the color sensor and its arm
+        colorSensor = hwMap.get(NormalizedColorSensor.class, "color_sensor");
+        colorSensorArm = hwMap.servo.get("color_sensor_arm");
+
+        // set motor default power to 0 for the motors and default position to .5 for the servo
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        lift.setPower(0);
+        left_grab.setPosition(0.1);
+        right_grab.setPosition(0.9);
+        horizontal_lift.setPower(0.0);
+        elbow_joint.setPosition(0.5);
+        claw.setPosition(0.57);
+        colorSensorArm.setPosition(0.0);
+
+
+        // just to make sure all the motors are running forward
+        backLeft.setDirection(DcMotor.Direction.FORWARD);
+        frontLeft.setDirection(DcMotor.Direction.FORWARD);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
+        frontRight.setDirection(DcMotor.Direction.FORWARD);
+        lift.setDirection(DcMotor.Direction.FORWARD);
+        horizontal_lift.setDirection(DcMotor.Direction.FORWARD);
+
+
+        // set all to run without encoder
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        horizontal_lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+    }
+}
