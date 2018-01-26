@@ -29,11 +29,12 @@ public class SeansFirstHardware {
     {
         hwMap = ahwMap;
 
+        //Names changed, so they need to be changed on the config file
         frontRight = hwMap.dcMotor.get("front_right");
         backRight = hwMap.dcMotor.get("back_right");
         frontLeft = hwMap.dcMotor.get("front_left");
         backLeft = hwMap.dcMotor.get("back_left");
-        linearSlideOne = hwMap.dcMotor.get("liner_slide_one");
+        linearSlideOne = hwMap.dcMotor.get("linear_slide_one");
         linearSlideTwo = hwMap.dcMotor.get("linear_slide_two");
         clawServo1 = hwMap.servo.get("claw_servo_1");
         clawServo2 = hwMap.servo.get("claw_servo_2");
