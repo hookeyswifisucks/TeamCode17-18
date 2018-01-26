@@ -79,12 +79,12 @@ if (gamepad1.left_stick_y > 0.1 || gamepad1.left_stick_y < -0.1) {
             }
             //Close
             if (gamepad1.b) {
-                robot.clawServo1.setPosition(0.1);
+                robot.clawServo1.setPosition(0.5);
                 robot.clawServo2.setPosition(0.5);
             }
             //Up I Guess
             if (gamepad1.dpad_up) {
-                robot.elbowServo.setPosition(0.5);
+                robot.elbowServo.setPosition(0.1);
             }
             //Down
             if (gamepad1.dpad_down) {
@@ -92,11 +92,11 @@ if (gamepad1.left_stick_y > 0.1 || gamepad1.left_stick_y < -0.1) {
             }
             //Open
             if (gamepad1.dpad_left) {
-                robot.vertClaw.setPosition(0.5);
+                robot.vertClaw.setPosition(0.1);
             }
             //Close
             if (gamepad1.dpad_right) {
-                robot.vertClaw.setPosition(0.1);
+                robot.vertClaw.setPosition(0.8);
             }
             
         }
