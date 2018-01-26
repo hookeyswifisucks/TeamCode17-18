@@ -26,7 +26,7 @@ public class SeansFirstDriver extends LinearOpMode {
 
         while(opModeIsActive()){
 
-            //Wheels
+            //Wheelzz
 
             if (gamepad1.left_stick_y > 0.1 || gamepad1.left_stick_y < -0.1) {
                 left_y = -gamepad1.left_stick_y;
@@ -73,8 +73,8 @@ public class SeansFirstDriver extends LinearOpMode {
             //Open
             if (gamepad1.a) {
                 //left
-                robot.clawServo1.setPosition(0.5);
                 //right
+                robot.clawServo1.setPosition(0.5);
                 robot.clawServo2.setPosition(0.9);
             }
             //Close
