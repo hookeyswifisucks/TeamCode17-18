@@ -17,9 +17,13 @@ import android.graphics.Color;
  * Created by Phoebe Taylor on 12/4/2017.
  * This code is for parking in the triangle zones with a mecanum drive train using encoders. Hopefully,
  * it will also put one glyph in the cryptobox
+ * TODO: color sensor isn't reading the ball... the rest of the code works, it moves, but the H value just isn't reading
+ * TODO: add telemetry/test out telemetry about h value read-ins, and possibly lengthen the sleep to get a better look
+ * TODO: I think the information reading in from the sensor is only being cycled through once somehow, so the array never gets refreshed
+ * TODO: ADD WHILE LOOP IN THE COLORSENSE METHOD TO FIX ^^^ SO THAT IT WILL JUST READ VALUES IN AND NOTHING ELSE FOR X SECONDS
  */
 
-@Autonomous(name = "AutoBlueStraightPark", group = "Autonomous Mecanum")
+@Autonomous(name = "AutoBlueStraightColor", group = "Autonomous Mecanum")
 public class AutoBlueStraightColor extends LinearOpMode {
 
     //make object of mecanum hardware class
@@ -30,6 +34,7 @@ public class AutoBlueStraightColor extends LinearOpMode {
 
     //create an object of the color sensor class so you can reference the HSV color values that it is reading
     //ColorSensorMecanum Csensor = new ColorSensorMecanum();
+    //TODO come back to this ^^
 
     //Variables you will need to calculate the circumference of the wheel and how long it takes to
     //spin the wheel once. 'final' means that it cannot be changed anywhere else in the program,
@@ -50,7 +55,7 @@ public class AutoBlueStraightColor extends LinearOpMode {
     We will not be going diagonally in this code, so you will only need to use one axis
     (just y axis for forward, just z for rotation, just x for laterally) */
 
-    /**For forward/backward motion with our wheel configuration, the right side needs to be negative, and the right
+    /**For forward/backward motion with our wheel configuration, the right side needs to be negative, and the left
      needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here)
      All measurements are in inches. 23.5 inches is about 90 DEGREES!!!!
      */
@@ -78,8 +83,6 @@ public class AutoBlueStraightColor extends LinearOpMode {
     //(don't put Blue or Red or BLUE or RED, because the loops on the colorSense method don't account for those.
     //I made the method account for both alliance colors because it was easier to do that and then copy/paste
     //into the other autonomous classes. It doesn't have to be done that way... actually:
-    //TODO: put all the methods in this class into their own class so all the auto methods can be accessed
-    //TODO from one place and don't have to be repeatedly coded into every auto program
     static final String ALLIANCE_COLOR = "blue";
 
     @Override
@@ -114,7 +117,7 @@ public class AutoBlueStraightColor extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //the LEFT and RIGHT in the variables denotes the wheel or side to which it is assigned, not the direction it aims to move the robot
-        colorSense(ALLIANCE_COLOR);
+        colorSense(ALLIANCE_COLOR, "In sensor loop");
 
         encoderDrive(DRIVE_SPEED, S1_LEFT, s1_RIGHT, 10.0, "forward");  // S1: Forward 25 inches with 5 Sec timeout
         encoderDrive(TURN_SPEED, S2_TURN, S2_TURN, 10.0, "turn");  // S2: Turn Right 9 inches with 4 Sec timeout
@@ -232,8 +235,8 @@ public class AutoBlueStraightColor extends LinearOpMode {
             robot.right_grab.setPosition(PositionRight);
         }
 
-        telemetry.addData(msg,"something");
-        telemetry.update();
+        //telemetry.addData(msg,"something");
+        //telemetry.update();
     }
 
 
@@ -241,15 +244,21 @@ public class AutoBlueStraightColor extends LinearOpMode {
     the data from it, and THEN actually read the color of the glyph. The code responsible for actually
     deciding what color it's seeing and what to do with what color is relatively small in and of itself
      */
-    public void colorSense (String allianceColor) {
+    public void colorSense (String allianceColor, String msg) {
+        //put the arm down
+        robot.jewel_arm.setPosition(0.38);
+
+
         //this just makes sure the light on the sensor is on... it should be by default but just in case
         if (robot.colorSensor instanceof SwitchableLight) {
             ((SwitchableLight)robot.colorSensor).enableLight(true);
         }
-        NormalizedColorSensor colorSensor;
 
         //this should read in the color values in RGB from the sensor
         NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
+
+        telemetry.addData(msg,"something");
+        telemetry.update();
 
         // values is a reference to the hsvValues array.
         float[] hsvValues = new float[3];
@@ -278,7 +287,13 @@ public class AutoBlueStraightColor extends LinearOpMode {
         this method. I will use the encoderDrive method to turn the robot the appropriate way, because
         there's no point in rewriting all that code in here when it already exists in that method
          */
-        robot.jewel_arm.setPosition(0.5);
+
+        sleep(1000);
+
+        telemetry.addData("Should be down","arm");
+        telemetry.addLine()
+            .addData("Hue", "%.2f", hsvValues[0]);
+        telemetry.update();
 
         if (allianceColor == "red") {
             //less than 60 is probably red, so if this is true, then the robot should turn right to
@@ -286,13 +301,13 @@ public class AutoBlueStraightColor extends LinearOpMode {
             //will make the robot turn right, and negative values will make it go left
             if (hsvValues[0] < 60) {
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "knock jewel off right"); //turns 2 inches right
-                robot.jewel_arm.setPosition(0.04);
+                robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "reset position"); //turns 2 inches right
 
             }
             if (hsvValues[0] > 180) {
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "knock jewel off left"); //turns 2 inches left
-                robot.jewel_arm.setPosition(0.04);
+                robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "reset position"); //turns 2 inches right
             }
         }
@@ -302,13 +317,13 @@ public class AutoBlueStraightColor extends LinearOpMode {
             //while in the blue alliance, so it should rotate left to knock off that jewel
             if (hsvValues[0] < 60){
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "knock jewel off left"); //turns 2 inches left
-                robot.jewel_arm.setPosition(0.04);
+                robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "reset position"); //turns 2 inches right
 
             }
             if (hsvValues[0] > 180) {
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "knock jewel off right"); //turns 2 inches right
-                robot.jewel_arm.setPosition(0.04);
+                robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "reset position"); //turns 2 inches right
             }
         }
