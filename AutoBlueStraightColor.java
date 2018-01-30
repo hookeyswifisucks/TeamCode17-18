@@ -17,10 +17,8 @@ import android.graphics.Color;
  * Created by Phoebe Taylor on 12/4/2017.
  * This code is for parking in the triangle zones with a mecanum drive train using encoders. Hopefully,
  * it will also put one glyph in the cryptobox
- * TODO: color sensor isn't reading the ball... the rest of the code works, it moves, but the H value just isn't reading
- * TODO: add telemetry/test out telemetry about h value read-ins, and possibly lengthen the sleep to get a better look
- * TODO: I think the information reading in from the sensor is only being cycled through once somehow, so the array never gets refreshed
- * TODO: ADD WHILE LOOP IN THE COLORSENSE METHOD TO FIX ^^^ SO THAT IT WILL JUST READ VALUES IN AND NOTHING ELSE FOR X SECONDS
+ * TODO: it works!! Sort of. The red H value readings are all over the place, my thought is because
+ * TODO: the distance between the sensor and the ball is inconsistent. Have the builders make the sensor smaller.
  */
 
 @Autonomous(name = "AutoBlueStraightColor", group = "Autonomous Mecanum")
@@ -95,8 +93,8 @@ public class AutoBlueStraightColor extends LinearOpMode {
         telemetry.update();
 
         //set the grabbers to be closed at start so we can put the glyph in it
-        robot.left_grab.setPosition(0.52);
-        robot.right_grab.setPosition(0.48);
+        robot.left_grab.setPosition(0.4);
+        robot.right_grab.setPosition(0.6);
 
         //tell the encoders to reset for a hot sec
         robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -117,7 +115,9 @@ public class AutoBlueStraightColor extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //the LEFT and RIGHT in the variables denotes the wheel or side to which it is assigned, not the direction it aims to move the robot
-        colorSense(ALLIANCE_COLOR, "In sensor loop");
+        colorSense(ALLIANCE_COLOR, "Should be reading");
+
+        //sleep(3000);
 
         encoderDrive(DRIVE_SPEED, S1_LEFT, s1_RIGHT, 10.0, "forward");  // S1: Forward 25 inches with 5 Sec timeout
         encoderDrive(TURN_SPEED, S2_TURN, S2_TURN, 10.0, "turn");  // S2: Turn Right 9 inches with 4 Sec timeout
@@ -246,39 +246,44 @@ public class AutoBlueStraightColor extends LinearOpMode {
      */
     public void colorSense (String allianceColor, String msg) {
         //put the arm down
-        robot.jewel_arm.setPosition(0.38);
+        robot.jewel_arm.setPosition(0.43);
 
+        // values is a reference to the hsvValues array.
+        float[] hsvValues = new float[3];
+        final float values[] = hsvValues;
 
         //this just makes sure the light on the sensor is on... it should be by default but just in case
         if (robot.colorSensor instanceof SwitchableLight) {
             ((SwitchableLight)robot.colorSensor).enableLight(true);
         }
 
-        //this should read in the color values in RGB from the sensor
-        NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
 
-        telemetry.addData(msg,"something");
-        telemetry.update();
+        runtime.reset();
+        while (runtime.seconds() < 2) {
+            //this should read in the color values in RGB from the sensor
+            NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
 
-        // values is a reference to the hsvValues array.
-        float[] hsvValues = new float[3];
-        final float values[] = hsvValues;
+            telemetry.addData("Should be down","arm");
+            telemetry.addLine()
+                    .addData("Hue", "%.2f", hsvValues[0]);
+            telemetry.update();
 
-        float max = Math.max(Math.max(Math.max(colors.red, colors.green), colors.blue), colors.alpha);
-        colors.red   /= max;
-        colors.green /= max;
-        colors.blue  /= max;
-        int color = colors.toColor();
+            float max = Math.max(Math.max(Math.max(colors.red, colors.green), colors.blue), colors.alpha);
+            colors.red /= max;
+            colors.green /= max;
+            colors.blue /= max;
+            int color = colors.toColor();
 
-        /*change the color values from RGB to HSV, because HSV is a more reliable spectrum of color data.
-        If you aren't sure why, google it for a full description, but basically HSV is Hue, Saturation,
-        and Vibrancy. The Hue is the "color" you're seeing, and the other two values essentially measure
-        the light in the room. This is good because if you are reading in values in two rooms with different
-        lighting, the RGB values will be drastically different, but the Hue value will remain similar
-        because HSV can correct for different lighting. This means that, when we later decide what color
-        the sensor is looking at, we will use just the H value.
-        */
-        Color.RGBToHSV(Color.red(color), Color.green(color), Color.blue(color), hsvValues);
+            /*change the color values from RGB to HSV, because HSV is a more reliable spectrum of color data.
+            If you aren't sure why, google it for a full description, but basically HSV is Hue, Saturation,
+            and Vibrancy. The Hue is the "color" you're seeing, and the other two values essentially measure
+            the light in the room. This is good because if you are reading in values in two rooms with different
+            lighting, the RGB values will be drastically different, but the Hue value will remain similar
+            because HSV can correct for different lighting. This means that, when we later decide what color
+            the sensor is looking at, we will use just the H value.
+            */
+            Color.RGBToHSV(Color.red(color), Color.green(color), Color.blue(color), hsvValues);
+        }
 
         /* the following code will actually execute and move the robot. First it will put the arm down,
         then read the color, and based upon the color it reads and what alliance color it is given,
@@ -288,24 +293,27 @@ public class AutoBlueStraightColor extends LinearOpMode {
         there's no point in rewriting all that code in here when it already exists in that method
          */
 
-        sleep(1000);
+        //sleep(1000);
 
         telemetry.addData("Should be down","arm");
         telemetry.addLine()
             .addData("Hue", "%.2f", hsvValues[0]);
         telemetry.update();
 
+        //I use sleeps to troubleshoot so I can stop all the movement for a time and see what the robot is doing
+        //sleep(3000);
+
         if (allianceColor == "red") {
-            //less than 60 is probably red, so if this is true, then the robot should turn right to
+            //greater than 300 is probably red, so if this is true, then the robot should turn right to
             //knock the opposite jewel off (blue jewel). Positive values for the direction of movement
             //will make the robot turn right, and negative values will make it go left
-            if (hsvValues[0] < 60) {
+            if (hsvValues[0] > 300) {
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "knock jewel off right"); //turns 2 inches right
                 robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "reset position"); //turns 2 inches right
 
             }
-            if (hsvValues[0] > 180) {
+            if (hsvValues[0] <= 300) {
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "knock jewel off left"); //turns 2 inches left
                 robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "reset position"); //turns 2 inches right
