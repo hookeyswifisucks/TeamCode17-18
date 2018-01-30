@@ -1,0 +1,103 @@
+package org.firstinspires.ftc.teamcode;
+
+import android.app.Activity;
+import android.graphics.Color;
+import android.support.annotation.ColorInt;
+import android.view.View;
+import com.qualcomm.ftcrobotcontroller.R;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.robotcore.internal.AppUtil;
+
+//stop
+/**
+ * Created by robotics on 12/15/2017.
+ */
+
+
+@Autonomous(name = "SensorAUT: AidansColorSensorConversion", group = "Sensor")
+//@Disabled
+public class AUTONOMOUSTELEMETRYCOLORSENSOR extends LinearOpMode
+{
+    NormalizedColorSensor ColorSensor0 = null;
+    float Hue;
+    String RedBlueNull;
+
+    @Override public void runOpMode()
+    {
+        ColorSensor0 = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+        RunSensor();
+    }
+
+    void RunSensor()
+    {
+        boolean bPrevState = false;
+        boolean bCurrState = false;
+
+
+        if (ColorSensor0 instanceof SwitchableLight) {
+            ((SwitchableLight)ColorSensor0).enableLight(true);
+        }
+
+        waitForStart();
+        while (opModeIsActive()) {
+
+            bCurrState = gamepad1.x;
+
+            if (bCurrState != bPrevState) {
+                if (bCurrState) {
+                    if (ColorSensor0 instanceof SwitchableLight) {
+                        SwitchableLight light = (SwitchableLight)ColorSensor0;
+                        light.enableLight(!light.isLightOn());
+                    }
+                }
+            }
+            bPrevState = bCurrState;
+
+            NormalizedRGBA colors = ColorSensor0.getNormalizedColors();
+            float[] hsvValues = new float[3];
+            Color.colorToHSV(colors.toColor(), hsvValues);
+            Hue = hsvValues[0];
+            telemetry.addLine()
+                    .addData("H", "%.3f", Hue)
+                    .addData("S", "%.3f", hsvValues[1])
+                    .addData("V", "%.3f", hsvValues[2]);
+
+
+            /*telemetry.addLine()
+                    .addData("a", "%.3f", colors.alpha)
+                    .addData("r", "%.3f", colors.red)
+                    .addData("g", "%.3f", colors.green)
+                    .addData("b", "%.3f", colors.blue);
+
+
+            @ColorInt int color = colors.toColor();
+            telemetry.addLine("color: ")
+                    .addData("a", "%02x", Color.alpha(color))
+                    .addData("r", "%02x", Color.red(color))
+                    .addData("g", "%02x", Color.green(color))
+                    .addData("b", "%02x", Color.blue(color));
+
+*/
+            telemetry.update();
+
+            if (Hue > 50){
+                RedBlueNull = "Blue";
+            }
+
+            else if (Hue < 50){
+                RedBlueNull = "Red";
+
+            }
+
+            telemetry.addData("THISISTHECURRENTCOLORPLSWORKOML", RedBlueNull);
+            telemetry.update();
+        }
+    }
+}
