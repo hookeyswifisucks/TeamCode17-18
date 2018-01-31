@@ -245,8 +245,13 @@ public class AutoBlueStraightColor extends LinearOpMode {
     deciding what color it's seeing and what to do with what color is relatively small in and of itself
      */
     public void colorSense (String allianceColor, String msg) {
-        //put the arm down
-        robot.jewel_arm.setPosition(0.43);
+        //put the arm down (1 is up), 0.43 is how far down i want it to get
+        double maxArm = 0.95;
+        while (maxArm > 0.43) {
+            maxArm -= 0.002;
+            robot.jewel_arm.setPosition(maxArm);
+        }
+
 
         // values is a reference to the hsvValues array.
         float[] hsvValues = new float[3];
@@ -259,7 +264,7 @@ public class AutoBlueStraightColor extends LinearOpMode {
 
 
         runtime.reset();
-        while (runtime.seconds() < 2) {
+        while (runtime.seconds() < 5) {
             //this should read in the color values in RGB from the sensor
             NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
 
@@ -304,16 +309,17 @@ public class AutoBlueStraightColor extends LinearOpMode {
         //sleep(3000);
 
         if (allianceColor == "red") {
-            //greater than 300 is probably red, so if this is true, then the robot should turn right to
+            //1-3 is probably red (I'm making the range really big just in case, so I'll use 50 instead),
+            //so if this is true, then the robot should turn right to
             //knock the opposite jewel off (blue jewel). Positive values for the direction of movement
             //will make the robot turn right, and negative values will make it go left
-            if (hsvValues[0] > 300) {
+            if (hsvValues[0] < 60) {
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "knock jewel off right"); //turns 2 inches right
                 robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "reset position"); //turns 2 inches right
 
             }
-            if (hsvValues[0] <= 300) {
+            else {
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "knock jewel off left"); //turns 2 inches left
                 robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "reset position"); //turns 2 inches right
@@ -321,18 +327,18 @@ public class AutoBlueStraightColor extends LinearOpMode {
         }
 
         if (allianceColor == "blue") {
-            //if the first loop (less than 60) is true, then the sensor is looking at the red jewel
-            //while in the blue alliance, so it should rotate left to knock off that jewel
-            if (hsvValues[0] < 60){
-                encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "knock jewel off left"); //turns 2 inches left
-                robot.jewel_arm.setPosition(0.94);
-                encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "reset position"); //turns 2 inches right
-
-            }
-            if (hsvValues[0] > 180) {
-                encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "knock jewel off right"); //turns 2 inches right
+            //if the first loop (greater than 60) is true, then the sensor is looking at the blue jewel
+            //while in the blue alliance, so it should rotate right to knock off the red jewel
+            if (hsvValues[0] > 60){
+                encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "knock jewel off right"); //turns 2 inches left
                 robot.jewel_arm.setPosition(0.94);
                 encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "reset position"); //turns 2 inches right
+
+            }
+            else {
+                encoderDrive(DRIVE_SPEED, -2, -2, 10.0, "knock jewel off left"); //turns 2 inches right
+                robot.jewel_arm.setPosition(0.94);
+                encoderDrive(DRIVE_SPEED, 2, 2, 10.0, "reset position"); //turns 2 inches right
             }
         }
 
