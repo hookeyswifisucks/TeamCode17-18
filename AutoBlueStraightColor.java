@@ -17,8 +17,9 @@ import android.graphics.Color;
  * Created by Phoebe Taylor on 12/4/2017.
  * This code is for parking in the triangle zones with a mecanum drive train using encoders. Hopefully,
  * it will also put one glyph in the cryptobox
- * TODO: it works!! Sort of. The red H value readings are all over the place, my thought is because
- * TODO: the distance between the sensor and the ball is inconsistent. Have the builders make the sensor smaller.
+ * TODO: It turns a little too much now toward the cryptobox, so it goes on crooked, that can be fixed with
+ * TODO: some fine tuning and trial and error. Also, bring the lift up a little bit so the block doesn't
+ * TODO: get hit or crooked on the start. Then, adopt the code for red side.
  */
 
 @Autonomous(name = "AutoBlueStraightColor", group = "Autonomous Mecanum")
@@ -29,10 +30,6 @@ public class AutoBlueStraightColor extends LinearOpMode {
 
     //declare an object of the ElapsedTime class to allow you to calculate how long you've been driving
     private ElapsedTime runtime = new ElapsedTime();
-
-    //create an object of the color sensor class so you can reference the HSV color values that it is reading
-    //ColorSensorMecanum Csensor = new ColorSensorMecanum();
-    //TODO come back to this ^^
 
     //Variables you will need to calculate the circumference of the wheel and how long it takes to
     //spin the wheel once. 'final' means that it cannot be changed anywhere else in the program,
@@ -57,25 +54,32 @@ public class AutoBlueStraightColor extends LinearOpMode {
      needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here)
      All measurements are in inches. 23.5 inches is about 90 DEGREES!!!!
      */
-    //s1 will be moving forward
-    static final double s1_RIGHT = -23;
-    static final double S1_LEFT = 23;
+    //s1 will be moving backward off the platform after the color sensor has finished doing its thing
+    static final double s1_RIGHT = 27.5;
+    static final double s1_LEFT = -27.5;
 
     //All Z axis values are positive, so you only need one variable for all the wheels
     //s2 is to turn to the right
-    static final double S2_TURN = 2;
+    static final double s2_TURN = -23.5;
 
-    //These values will go to the grabbers
-    static final double DROP_RIGHT = 1;
-    static final double DROP_LEFT = 0;
+    //s3 will be moving forward, parallel to the cryptobox
+    static final double s3_RIGHT = -7;
+    static final double s3_LEFT = 7;
 
-    //s3 will be moving forward into the cryptobox
-    static final double s3_RIGHT = -13;
-    static final double s3_LEFT = 13;
+    //s4 will turn 90 degrees so the robot is (ideally) facing the cryptobox
+    static final double s4_TURN = -23.5;
 
-    //s4 will move back just a little bit so that the glyph is not in contact with the robot
-    static final double s4_RIGHT = 4;
-    static final double s4_LEFT = -4;
+    //drop the glyph so we can push it in
+    static final double DROP_RIGHT = 0.95;
+    static final double DROP_LEFT = 0.05;
+
+    //s5 will move forward into the box
+    static final double s5_RIGHT = 7.5;
+    static final double s5_LEFT = 7.5;
+
+    //s6 will back up just a little so that it isn't in contact with the glyph (which is not allowed)
+    static final double s6_RIGHT = 2;
+    static final double s6_LEFT = -2;
 
     //say which alliance color so the jewel code will know which one to knock off. Keep this lower case
     //(don't put Blue or Red or BLUE or RED, because the loops on the colorSense method don't account for those.
@@ -93,8 +97,8 @@ public class AutoBlueStraightColor extends LinearOpMode {
         telemetry.update();
 
         //set the grabbers to be closed at start so we can put the glyph in it
-        robot.left_grab.setPosition(0.4);
-        robot.right_grab.setPosition(0.6);
+        robot.left_grab.setPosition(0.34);
+        robot.right_grab.setPosition(0.64);
 
         //tell the encoders to reset for a hot sec
         robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -117,15 +121,15 @@ public class AutoBlueStraightColor extends LinearOpMode {
         //the LEFT and RIGHT in the variables denotes the wheel or side to which it is assigned, not the direction it aims to move the robot
         colorSense(ALLIANCE_COLOR, "Should be reading");
 
-        //sleep(3000);
-
-        encoderDrive(DRIVE_SPEED, S1_LEFT, s1_RIGHT, 10.0, "forward");  // S1: Forward 25 inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED, S2_TURN, S2_TURN, 10.0, "turn");  // S2: Turn Right 9 inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, s1_LEFT, s1_RIGHT, 10.0, "backward");  // S1: backward 23.5'' off board
+        encoderDrive(TURN_SPEED, s2_TURN, s2_TURN, 10.0, "turn 90 degrees");  // S2: Turn left 90 degrees
+        encoderDrive(DRIVE_SPEED, s3_LEFT, s3_RIGHT, 10.0, "forward a little"); // s3: Forward a little
+        encoderDrive(TURN_SPEED, s4_TURN, s4_TURN, 10.0, "turn 90 degrees"); //s4: turn another 90 left
 
         glyphPlacement(DROP_RIGHT, DROP_LEFT, 0, "open grabber"); //open grabber to drop the glyph
 
-        encoderDrive(DRIVE_SPEED, s3_LEFT, s3_RIGHT, 10.0, "forward push");  // S3: Forward 10 inches with 10 Sec timeout
-        encoderDrive(DRIVE_SPEED, s4_LEFT, s4_RIGHT, 10.0, "Retreat");  // S3: Forward 10 inches with 10 Sec timeout
+        encoderDrive(DRIVE_SPEED, s5_LEFT, s5_RIGHT, 10.0, "into the cryptobox"); // forward into the box
+        encoderDrive(DRIVE_SPEED, s6_LEFT, s6_RIGHT, 10.0, "Retreat");  // S3: retreat like 2 inches so we're not touching the glyph
 
 
     }
@@ -179,6 +183,9 @@ public class AutoBlueStraightColor extends LinearOpMode {
             robot.frontRight.setPower(power);
             robot.backRight.setPower(power);
 
+            telemetry.addData("Current Stage: ", msg);
+            telemetry.update();
+
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             while (opModeIsActive() &&
@@ -196,11 +203,11 @@ public class AutoBlueStraightColor extends LinearOpMode {
                 int whereBackRightThinks = robot.backRight.getCurrentPosition();
                 int whereBackLeftThinks = robot.backLeft.getCurrentPosition();
 
-                telemetry.addData("front right position: ", whereFrontRightThinks);
+                /*telemetry.addData("front right position: ", whereFrontRightThinks);
                 telemetry.addData("front left position: ", whereFrontLeftThinks);
                 telemetry.addData("back right position: ", whereBackRightThinks);
-                telemetry.addData("back left position: ", whereBackLeftThinks);
-
+                telemetry.addData("back left position: ", whereBackLeftThinks);*/
+                telemetry.addData("current stage: ", msg);
                 telemetry.update();
             }
 
