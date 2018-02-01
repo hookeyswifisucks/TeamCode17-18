@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Created by Phoebe Taylor on 12/4/2017.
  * This code is for parking in the triangle zones with a mecanum drive train using encoders. Hopefully,
  * it will also put one glyph in the cryptobox
- * TODO perfect the measurements so the glyph goes straight in rather than at a weird angle
  */
 
 @Autonomous(name = "AutoBlueTurnPark", group = "Autonomous Mecanum")
@@ -40,9 +39,9 @@ public class AutoBlueTurnLift extends LinearOpMode {
     (just y axis for forward, just z for rotation, just x for laterally) */
 
     /**For forward/backward motion with our wheel configuration, the right side needs to be negative, and the right
-    needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here)
-    All measurements are in inches. 23.5 inches is about 90 DEGREES!!!!
- */
+     needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here)
+     All measurements are in inches. 23.5 inches is about 90 DEGREES!!!!
+     */
     //s1 will be moving forward
     static final double s1_RIGHT = -25;
     static final double S1_LEFT = 25;
