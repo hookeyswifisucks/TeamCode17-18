@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Created by Phoebe Taylor on 12/4/2017.
  * This code is for parking in the triangle zones with a mecanum drive train using encoders. Hopefully,
  * it will also put one glyph in the cryptobox
- * TODO: The Right grabber gets caught on the wheel after it opens bc the lift plate is wobbly
  */
 
 @Autonomous(name = "AutoRedStraightPark", group = "Autonomous Mecanum")
