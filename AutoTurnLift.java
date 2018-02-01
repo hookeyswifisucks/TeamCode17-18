@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,9 +12,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  * it will also put one glyph in the cryptobox
  */
 
-@Autonomous(name = "AutoTurnPark", group = "Autonomous Mecanum")
-public class AutoTurnLift extends LinearOpMode {
-
+@Autonomous(name = "AutoRedTurnPark", group = "Autonomous Mecanum")
+public class AutoRedTurnLift extends LinearOpMode{
     //make object of mecanum hardware class
     MecanumHardware robot = new MecanumHardware();
     //declare an object of the ElapsedTime class to allow you to calculate how long you've been driving
@@ -41,9 +39,9 @@ public class AutoTurnLift extends LinearOpMode {
     (just y axis for forward, just z for rotation, just x for laterally) */
 
     /**For forward/backward motion with our wheel configuration, the right side needs to be negative, and the right
-    needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here)
-    All measurements are in inches
- */
+     needs to be positive (opposite of the driver class's logic because we reverse Y in the driver but not here)
+     All measurements are in inches
+     */
     //s1 will be moving forward
     static final double s1_RIGHT = -25;
     static final double S1_LEFT = 25;
@@ -217,3 +215,4 @@ public class AutoTurnLift extends LinearOpMode {
     }
 
 }
+
