@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by Phoebe Taylor on 12/4/2017.
- * This code is for parking in the triangle zones with a mecanum drive train using encoders. Hopefully,
- * it will also put one glyph in the cryptobox
+ * This code is for parking in the triangle zones with a mecanum drive train using encoders. It
+ * will also put one glyph in the cryptobox
  */
 
 @Autonomous(name = "AutoBlueStraightPark", group = "Autonomous Mecanum")
