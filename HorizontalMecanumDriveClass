@@ -17,9 +17,11 @@ import com.qualcomm.robotcore.hardware.DigitalChannelController;
  * 'B' will extend the horizontal lift and 'A' will retract it
  * left bumper will rotate the elbow of the horizontal lift from parallel to perpendicular to the ground
  * The down button on the dpad will alternate between the relic grabber opening and closing
- * TODO: program in the second horizontal lift motor, which should be opposite to the first. Reverse
- * TODO: the speed on the first motor before you do that, because the gears reversed it so b extends now
- * TODO: Program the additional servos up top, probably for the bumpers. Also FIX COMMENTS FOR CONTROLS
+ * TODO: FIX COMMENTS FOR CONTROLS
+ * TODO: open right bottom grabber less on the init (still hits the guide piece)
+ * TODO: left grabbers should both open just a bit more, adjust limits
+ * TODO: Right grabbers both need to close a bit more than they do, adjust limits
+ * TODO: Possibly put up the color sense arm up a little less on init as well, closer to teleop open
  *
  */
 
@@ -33,10 +35,16 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
     /*The following variables are used to gradually increment up or down the values of the servos so
     that you no longer have to set a specific position for open/closed. Just hold down the button and
     it will close or open gradually
+    0.0 is open left bottom servo grabber
+    1.0 is open right bottom servo grabber
+    0.0 is open left top servo grabber
+    1.0 is open right top servo grabber
      */
     public double elbow_value = 0.5;
-    public double left_grab_value = 0.1;
-    public double right_grab_value = 0.9;
+    public double left_grab_value = 0.01; //open
+    public double right_grab_value = 0.99; //close
+    public double left_top_value = 0.01;
+    public double right_top_value = 0.99;
     public double min_left_grab_value = 0.32;
     public double min_right_grab_value = 0.68;
 
@@ -57,7 +65,7 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
 
         waitForStart();
         while (opModeIsActive()) {
-            /* following code is for the drive train */
+            /** following code is for the drive train */
             //buffer for y axis of steering
             if (gamepad1.left_stick_y < -0.01 || gamepad1.left_stick_y > 0.01) {
                 y_axis = -gamepad1.left_stick_y;
@@ -87,17 +95,28 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             /*code for grabber, right bumper for open, right bumper for open/drop
             * the first while loop will increment the grabber closed (left dpad). The second while
             * loop will increment the grabber open (right dpad) */
-            //close
-            while (gamepad1.dpad_left && left_grab_value < min_left_grab_value && right_grab_value > min_right_grab_value) {
+            //close, min value left can close is 0.32, min value right can close is 0.68
+            while (gamepad1.dpad_left && left_grab_value < 0.45 && right_grab_value > 0.55) {
+                //bottom pair of grabbers
                 robot.left_grab.setPosition(left_grab_value);
                 robot.right_grab.setPosition(right_grab_value);
+                //top pair of grabbers
+                robot.top_left.setPosition(left_grab_value);
+                robot.top_right.setPosition(right_grab_value);
+                //increment up
                 left_grab_value += 0.004;
+//                left_top_value += 0.004;
                 right_grab_value -= 0.004;
+//                right_top_value -= 0.004;
             }
             //open
             while (gamepad1.dpad_right && left_grab_value > 0.1 && right_grab_value < 0.9) {
+                //bottom pair of grabbers
                 robot.left_grab.setPosition(left_grab_value);
                 robot.right_grab.setPosition(right_grab_value);
+                //top pair of grabbers
+                robot.top_left.setPosition(left_grab_value);
+                robot.top_right.setPosition(right_grab_value);
                 left_grab_value -= 0.004;
                 right_grab_value += 0.004;
             }
@@ -109,7 +128,7 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             telemetry.update();
 
             if (gamepad1.y) {
-                robot.lift.setPower(0.32);
+                robot.lift.setPower(-0.32);
 
             }
             else if (gamepad1.x) {
@@ -117,7 +136,7 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
                     robot.lift.setPower(0);
                 }
                 else if (robot.bottom_sensor.getState() == true) {
-                    robot.lift.setPower(-0.3);
+                    robot.lift.setPower(0.3);
                 }
             }
             else {
@@ -128,15 +147,17 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             //while the 'b' button is pressed, arm will extend, while 'a' is pressed it will come back in
             if (gamepad1.b) {
                 robot.horizontal_lift.setPower(-0.3);
+                robot.back_lift.setPower(-0.3);
             }
             else if (gamepad1.a) {
                 robot.horizontal_lift.setPower(0.3);
+                robot.back_lift.setPower(0.3);
             }
             else {
                 robot.horizontal_lift.setPower(0);
+                robot.back_lift.setPower(0);
             }
-            //the switch will allow driver to change from having the elbow perpendicular to the ground
-            //to parallel to the ground
+            //left trigger opens the claw, right trigger closes
             while (gamepad1.left_trigger > 0.1 && gamepad1.right_trigger < 0.1) {
                 robot.claw.setPosition(0.13);
             }
