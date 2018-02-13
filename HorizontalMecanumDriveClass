@@ -17,6 +17,10 @@ import com.qualcomm.robotcore.hardware.DigitalChannelController;
  * 'B' will extend the horizontal lift and 'A' will retract it
  * left bumper will rotate the elbow of the horizontal lift from parallel to perpendicular to the ground
  * The down button on the dpad will alternate between the relic grabber opening and closing
+ * TODO: program in the second horizontal lift motor, which should be opposite to the first. Reverse
+ * TODO: the speed on the first motor before you do that, because the gears reversed it so b extends now
+ * TODO: Program the additional servos up top, probably for the bumpers. Also FIX COMMENTS FOR CONTROLS
+ *
  */
 
 @TeleOp(name="With horizontal lift", group = "mecanum")
@@ -33,6 +37,8 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
     public double elbow_value = 0.5;
     public double left_grab_value = 0.1;
     public double right_grab_value = 0.9;
+    public double min_left_grab_value = 0.32;
+    public double min_right_grab_value = 0.68;
 
     public boolean buttonPressed = true;
 
@@ -53,19 +59,19 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
         while (opModeIsActive()) {
             /* following code is for the drive train */
             //buffer for y axis of steering
-            if (gamepad1.left_stick_y < -0.1 || gamepad1.left_stick_y > 0.1) {
+            if (gamepad1.left_stick_y < -0.01 || gamepad1.left_stick_y > 0.01) {
                 y_axis = -gamepad1.left_stick_y;
             } else {
                 y_axis = 0;
             }
             //buffer for x axis of steering
-            if (gamepad1.left_stick_x < -0.1 || gamepad1.left_stick_x > 0.1) {
+            if (gamepad1.left_stick_x < -0.01 || gamepad1.left_stick_x > 0.01) {
                 x_axis = gamepad1.left_stick_x;
             } else {
                 x_axis = 0;
             }
             //buffer for z axis (turning)
-            if (gamepad1.right_stick_x < -0.1 || gamepad1.right_stick_x > 0.1) {
+            if (gamepad1.right_stick_x < -0.01 || gamepad1.right_stick_x > 0.01) {
                 z_axis = gamepad1.right_stick_x;
             } else {
                 z_axis = 0;
@@ -82,7 +88,7 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             * the first while loop will increment the grabber closed (left dpad). The second while
             * loop will increment the grabber open (right dpad) */
             //close
-            while (gamepad1.dpad_left && left_grab_value < 0.52 && right_grab_value > 0.48) {
+            while (gamepad1.dpad_left && left_grab_value < min_left_grab_value && right_grab_value > min_right_grab_value) {
                 robot.left_grab.setPosition(left_grab_value);
                 robot.right_grab.setPosition(right_grab_value);
                 left_grab_value += 0.004;
@@ -98,8 +104,12 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
 
             //code for the lift motor. Y button will go up, X will go down, and if the limit switch
             //and the X button are pressed simultaneously, the motor will not move
+            buttonPressed = robot.bottom_sensor.getState();
+            telemetry.addData("touch sensor is:", buttonPressed);
+            telemetry.update();
+
             if (gamepad1.y) {
-                robot.lift.setPower(0.25);
+                robot.lift.setPower(0.32);
 
             }
             else if (gamepad1.x) {
@@ -109,9 +119,6 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
                 else if (robot.bottom_sensor.getState() == true) {
                     robot.lift.setPower(-0.3);
                 }
-                buttonPressed = robot.bottom_sensor.getState();
-                telemetry.addData("touch sensor is:", buttonPressed);
-                telemetry.update();
             }
             else {
                 robot.lift.setPower(0);
@@ -133,8 +140,9 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             while (gamepad1.left_trigger > 0.1 && gamepad1.right_trigger < 0.1) {
                 robot.claw.setPosition(0.13);
             }
+            //close
             while (gamepad1.right_trigger > 0.1 && gamepad1.left_trigger < 0.1) {
-                robot.claw.setPosition(0.57);
+                robot.claw.setPosition(0.62);
             }
 
             //the down button on the dpad will open the horizontal grabber, the up will close it
@@ -146,6 +154,8 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
                 robot.elbow_joint.setPosition(elbow_value);
                 elbow_value -= 0.001;
             }
+
+            robot.jewel_arm.setPosition(0.94);
             telemetry.update();
         }
 
