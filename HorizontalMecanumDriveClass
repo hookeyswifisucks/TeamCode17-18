@@ -18,8 +18,6 @@ import com.qualcomm.robotcore.hardware.DigitalChannelController;
  * 'B' will extend the horizontal lift and 'A' will retract it
  * left bumper will will increment the elbow up, right will increment it down
  * TODO: FIX COMMENTS FOR CONTROLS
- * TODO: top two work now, but the servos close too much, so just change values. also, close the bottom
- * TODO: servos just a liiiiittle bit more
  */
 
 @TeleOp(name="With horizontal lift", group = "mecanum")
@@ -42,15 +40,15 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
     public double bottom_left_grab = 0.01; //open (is 0)
     public double bottom_right_grab = 0.80; //open (is 1)
     //the following two variables will be the close value limits for the bottom two grabbers
-    public double close_bottom_left = 0.65; //was .60 //closed is 1
+    public double close_bottom_left = 0.47; //was .48 //closed is 1
     public double close_bottom_right = 0.46; //was .48 //closed is 0
 
     //the next two variables will serve as the running value for the incrementation of the grabbers open/closed
     public double top_left_grab = 0.01; //open (is 0)
     public double top_right_grab = 0.80; //open (is 1)
     //the following two variables will be the open value limits for the top two grabbers
-    public double close_top_left = 0.52; // closed is 1 //was 0.73
-    public double close_top_right = 0.48; //closed is 0 //was 0.45
+    public double close_top_left = 0.47; // closed is 1 //was 0.45
+    public double close_top_right = 0.46; //closed is 0 //was 0.48
 
 
     public boolean buttonPressed = true;
@@ -100,16 +98,20 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
             * the first while loop will increment the grabber closed (left dpad). The second while
             * loop will increment the grabber open (right dpad) */
             //close
-            while (gamepad1.dpad_left && bottom_left_grab < close_bottom_left && bottom_right_grab > close_bottom_right) {
-                //bottom pair of grabbers
-                robot.left_grab.setPosition(bottom_left_grab);
-                robot.right_grab.setPosition(bottom_right_grab);
-                //increment closed
-                bottom_left_grab += 0.006;
-                bottom_right_grab -= 0.006;
+            while (gamepad1.dpad_left){
+                    if (bottom_left_grab < close_bottom_left) {
+                        //bottom pair of grabbers
+                        robot.left_grab.setPosition(bottom_left_grab);
+                        //increment closed
+                        bottom_left_grab += 0.006;
+                    }
+                    if (bottom_right_grab > close_bottom_right) {
+                        robot.right_grab.setPosition(bottom_right_grab);
+                        bottom_right_grab -= 0.006;
+                    }
             }
             //open
-            while (gamepad1.dpad_right && bottom_left_grab > 0.05 && bottom_right_grab < 0.95) {
+            while (gamepad1.dpad_right && bottom_left_grab > 0.05 && bottom_right_grab < 0.8) {
                 //bottom pair of grabbers
                 robot.left_grab.setPosition(bottom_left_grab);
                 robot.right_grab.setPosition(bottom_right_grab);
@@ -118,18 +120,21 @@ public class HorizontalMecanumDriveClass extends LinearOpMode{
                 bottom_right_grab += 0.006;
             }
             //close
-            while (gamepad1.dpad_up) {
-                if (top_left_grab < close_top_left || top_right_grab > close_top_right) {
+            while (gamepad1.dpad_down) {
+                if (top_left_grab < close_top_left) {
                     //top pair of grabbers
                     robot.top_left.setPosition(top_left_grab);
-                    robot.top_right.setPosition(top_right_grab);
                     //increment closed
                     top_left_grab += 0.006;
+                }
+                if (top_right_grab > close_top_right) {
+                    robot.top_right.setPosition(top_right_grab);
                     top_right_grab -= 0.006;
+
                 }
             }
-            //open
-            while (gamepad1.dpad_down && top_left_grab > 0.1 && top_right_grab < 0.9) {
+            //open //these should be changed to have the same logic as the close grabbers, it has the same problems with not closing enough
+            while (gamepad1.dpad_up && top_left_grab > 0.2 && top_right_grab < 0.9) {
                 //top pair of grabbers
                 robot.top_left.setPosition(top_left_grab);
                 robot.top_right.setPosition(top_right_grab);
